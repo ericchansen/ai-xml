@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Example: Simple Order Processing BPMN 2.0 -->
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             id="OrderProcessingDefinitions"
+             name="Order Processing"
+             targetNamespace="http://example.com/bpmn/order-processing">
+
+  <process id="OrderProcessingProcess" name="Order Processing" isExecutable="true">
+    
+    <!-- Start Event -->
+    <startEvent id="StartEvent_1" name="Order Received">
+      <outgoing>Flow_1</outgoing>
+    </startEvent>
+
+    <!-- Validate Order -->
+    <serviceTask id="Task_ValidateOrder" name="Validate Order" 
+                 implementation="##WebService" operationRef="validateOrder">
+      <incoming>Flow_1</incoming>
+      <outgoing>Flow_2</outgoing>
+    </serviceTask>
+
+    <!-- Check Inventory Gateway -->
+    <exclusiveGateway id="Gateway_CheckInventory" name="Inventory Available?" 
+                      gatewayDirection="Diverging">
+      <incoming>Flow_2</incoming>
+      <outgoing>Flow_3</outgoing>
+      <outgoing>Flow_4</outgoing>
+    </exclusiveGateway>
+
+    <!-- Process Payment (if inventory available) -->
+    <serviceTask id="Task_ProcessPayment" name="Process Payment"
+                 implementation="##WebService" operationRef="processPayment">
+      <incoming>Flow_3</incoming>
+      <outgoing>Flow_5</outgoing>
+    </serviceTask>
+
+    <!-- Notify Customer (if no inventory) -->
+    <serviceTask id="Task_NotifyBackorder" name="Notify Backorder"
+                 implementation="##WebService" operationRef="notifyBackorder">
+      <incoming>Flow_4</incoming>
+      <outgoing>Flow_6</outgoing>
+    </serviceTask>
+
+    <!-- Merge Gateway -->
+    <exclusiveGateway id="Gateway_Merge" name="Merge" gatewayDirection="Converging">
+      <incoming>Flow_5</incoming>
+      <incoming>Flow_6</incoming>
+      <outgoing>Flow_7</outgoing>
+    </exclusiveGateway>
+
+    <!-- Ship Order -->
+    <serviceTask id="Task_ShipOrder" name="Ship Order"
+                 implementation="##WebService" operationRef="shipOrder">
+      <incoming>Flow_7</incoming>
+      <outgoing>Flow_8</outgoing>
+    </serviceTask>
+
+    <!-- End Event -->
+    <endEvent id="EndEvent_1" name="Order Completed">
+      <incoming>Flow_8</incoming>
+    </endEvent>
+
+    <!-- Sequence Flows -->
+    <sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_ValidateOrder"/>
+    <sequenceFlow id="Flow_2" sourceRef="Task_ValidateOrder" targetRef="Gateway_CheckInventory"/>
+    <sequenceFlow id="Flow_3" name="Yes" sourceRef="Gateway_CheckInventory" targetRef="Task_ProcessPayment">
+      <conditionExpression>${inventoryAvailable == true}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_4" name="No" sourceRef="Gateway_CheckInventory" targetRef="Task_NotifyBackorder">
+      <conditionExpression>${inventoryAvailable == false}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_5" sourceRef="Task_ProcessPayment" targetRef="Gateway_Merge"/>
+    <sequenceFlow id="Flow_6" sourceRef="Task_NotifyBackorder" targetRef="Gateway_Merge"/>
+    <sequenceFlow id="Flow_7" sourceRef="Gateway_Merge" targetRef="Task_ShipOrder"/>
+    <sequenceFlow id="Flow_8" sourceRef="Task_ShipOrder" targetRef="EndEvent_1"/>
+
+  </process>
+
+</definitions>

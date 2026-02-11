@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Simplified BPMN 2.0 XSD for validation demo -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+           targetNamespace="http://www.omg.org/spec/BPMN/20100524/MODEL"
+           elementFormDefault="qualified">
+
+  <!-- Root element -->
+  <xs:element name="definitions" type="bpmn:tDefinitions"/>
+
+  <xs:complexType name="tDefinitions">
+    <xs:sequence>
+      <xs:element ref="bpmn:process" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:ID" use="required"/>
+    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="targetNamespace" type="xs:anyURI" use="required"/>
+  </xs:complexType>
+
+  <xs:element name="process" type="bpmn:tProcess"/>
+
+  <xs:complexType name="tProcess">
+    <xs:sequence>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="bpmn:startEvent"/>
+        <xs:element ref="bpmn:endEvent"/>
+        <xs:element ref="bpmn:task"/>
+        <xs:element ref="bpmn:serviceTask"/>
+        <xs:element ref="bpmn:userTask"/>
+        <xs:element ref="bpmn:scriptTask"/>
+        <xs:element ref="bpmn:exclusiveGateway"/>
+        <xs:element ref="bpmn:parallelGateway"/>
+        <xs:element ref="bpmn:sequenceFlow"/>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:ID" use="required"/>
+    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="isExecutable" type="xs:boolean" default="false"/>
+  </xs:complexType>
+
+  <!-- Events -->
+  <xs:element name="startEvent" type="bpmn:tStartEvent"/>
+  <xs:complexType name="tStartEvent">
+    <xs:sequence>
+      <xs:element ref="bpmn:outgoing" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:ID" use="required"/>
+    <xs:attribute name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:element name="endEvent" type="bpmn:tEndEvent"/>
+  <xs:complexType name="tEndEvent">
+    <xs:sequence>
+      <xs:element ref="bpmn:incoming" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:ID" use="required"/>
+    <xs:attribute name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <!-- Tasks -->
+  <xs:element name="task" type="bpmn:tTask"/>
+  <xs:complexType name="tTask">
+    <xs:sequence>
+      <xs:element ref="bpmn:incoming" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="bpmn:outgoing" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:ID" use="required"/>
+    <xs:attribute name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:element name="serviceTask" type="bpmn:tServiceTask"/>
+  <xs:complexType name="tServiceTask">
+    <xs:complexContent>
+      <xs:extension base="bpmn:tTask">
+        <xs:attribute name="implementation" type="xs:string"/>
+        <xs:attribute name="operationRef" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="userTask" type="bpmn:tUserTask"/>
+  <xs:complexType name="tUserTask">
+    <xs:complexContent>
+      <xs:extension base="bpmn:tTask">
+        <xs:attribute name="assignee" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="scriptTask" type="bpmn:tScriptTask"/>
+  <xs:complexType name="tScriptTask">
+    <xs:complexContent>
+      <xs:extension base="bpmn:tTask">
+        <xs:sequence>
+          <xs:element name="script" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="scriptFormat" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Gateways -->
+  <xs:element name="exclusiveGateway" type="bpmn:tExclusiveGateway"/>
+  <xs:complexType name="tExclusiveGateway">
+    <xs:sequence>
+      <xs:element ref="bpmn:incoming" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="bpmn:outgoing" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:ID" use="required"/>
+    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="gatewayDirection" type="bpmn:tGatewayDirection" default="Unspecified"/>
+  </xs:complexType>
+
+  <xs:element name="parallelGateway" type="bpmn:tParallelGateway"/>
+  <xs:complexType name="tParallelGateway">
+    <xs:sequence>
+      <xs:element ref="bpmn:incoming" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="bpmn:outgoing" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:ID" use="required"/>
+    <xs:attribute name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:simpleType name="tGatewayDirection">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Unspecified"/>
+      <xs:enumeration value="Converging"/>
+      <xs:enumeration value="Diverging"/>
+      <xs:enumeration value="Mixed"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Sequence Flow -->
+  <xs:element name="sequenceFlow" type="bpmn:tSequenceFlow"/>
+  <xs:complexType name="tSequenceFlow">
+    <xs:sequence>
+      <xs:element name="conditionExpression" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:ID" use="required"/>
+    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="sourceRef" type="xs:IDREF" use="required"/>
+    <xs:attribute name="targetRef" type="xs:IDREF" use="required"/>
+  </xs:complexType>
+
+  <!-- Flow references -->
+  <xs:element name="incoming" type="xs:IDREF"/>
+  <xs:element name="outgoing" type="xs:IDREF"/>
+
+</xs:schema>

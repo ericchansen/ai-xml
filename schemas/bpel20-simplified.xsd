@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Simplified WS-BPEL 2.0 XSD for validation demo -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+           targetNamespace="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+           elementFormDefault="qualified">
+
+  <!-- Root element -->
+  <xs:element name="process" type="bpel:tProcess"/>
+
+  <xs:complexType name="tProcess">
+    <xs:sequence>
+      <xs:element ref="bpel:partnerLinks" minOccurs="0"/>
+      <xs:element ref="bpel:variables" minOccurs="0"/>
+      <xs:group ref="bpel:activity"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:NCName" use="required"/>
+    <xs:attribute name="targetNamespace" type="xs:anyURI" use="required"/>
+    <xs:attribute name="queryLanguage" type="xs:anyURI" default="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"/>
+    <xs:attribute name="expressionLanguage" type="xs:anyURI" default="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"/>
+  </xs:complexType>
+
+  <!-- Partner Links -->
+  <xs:element name="partnerLinks" type="bpel:tPartnerLinks"/>
+  <xs:complexType name="tPartnerLinks">
+    <xs:sequence>
+      <xs:element ref="bpel:partnerLink" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="partnerLink" type="bpel:tPartnerLink"/>
+  <xs:complexType name="tPartnerLink">
+    <xs:attribute name="name" type="xs:NCName" use="required"/>
+    <xs:attribute name="partnerLinkType" type="xs:QName" use="required"/>
+    <xs:attribute name="myRole" type="xs:NCName"/>
+    <xs:attribute name="partnerRole" type="xs:NCName"/>
+  </xs:complexType>
+
+  <!-- Variables -->
+  <xs:element name="variables" type="bpel:tVariables"/>
+  <xs:complexType name="tVariables">
+    <xs:sequence>
+      <xs:element ref="bpel:variable" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="variable" type="bpel:tVariable"/>
+  <xs:complexType name="tVariable">
+    <xs:attribute name="name" type="xs:NCName" use="required"/>
+    <xs:attribute name="messageType" type="xs:QName"/>
+    <xs:attribute name="type" type="xs:QName"/>
+    <xs:attribute name="element" type="xs:QName"/>
+  </xs:complexType>
+
+  <!-- Activity Group -->
+  <xs:group name="activity">
+    <xs:choice>
+      <xs:element ref="bpel:receive"/>
+      <xs:element ref="bpel:reply"/>
+      <xs:element ref="bpel:invoke"/>
+      <xs:element ref="bpel:assign"/>
+      <xs:element ref="bpel:throw"/>
+      <xs:element ref="bpel:exit"/>
+      <xs:element ref="bpel:wait"/>
+      <xs:element ref="bpel:empty"/>
+      <xs:element ref="bpel:sequence"/>
+      <xs:element ref="bpel:if"/>
+      <xs:element ref="bpel:while"/>
+      <xs:element ref="bpel:repeatUntil"/>
+      <xs:element ref="bpel:forEach"/>
+      <xs:element ref="bpel:pick"/>
+      <xs:element ref="bpel:flow"/>
+      <xs:element ref="bpel:scope"/>
+    </xs:choice>
+  </xs:group>
+
+  <!-- Basic Activities -->
+  <xs:element name="receive" type="bpel:tReceive"/>
+  <xs:complexType name="tReceive">
+    <xs:attribute name="name" type="xs:NCName"/>
+    <xs:attribute name="partnerLink" type="xs:NCName" use="required"/>
+    <xs:attribute name="portType" type="xs:QName"/>
+    <xs:attribute name="operation" type="xs:NCName" use="required"/>
+    <xs:attribute name="variable" type="xs:NCName"/>
+    <xs:attribute name="createInstance" type="xs:boolean" default="false"/>
+  </xs:complexType>
+
+  <xs:element name="reply" type="bpel:tReply"/>
+  <xs:complexType name="tReply">
+    <xs:attribute name="name" type="xs:NCName"/>
+    <xs:attribute name="partnerLink" type="xs:NCName" use="required"/>
+    <xs:attribute name="portType" type="xs:QName"/>
+    <xs:attribute name="operation" type="xs:NCName" use="required"/>
+    <xs:attribute name="variable" type="xs:NCName"/>
+  </xs:complexType>
+
+  <xs:element name="invoke" type="bpel:tInvoke"/>
+  <xs:complexType name="tInvoke">
+    <xs:attribute name="name" type="xs:NCName"/>
+    <xs:attribute name="partnerLink" type="xs:NCName" use="required"/>
+    <xs:attribute name="portType" type="xs:QName"/>
+    <xs:attribute name="operation" type="xs:NCName" use="required"/>
+    <xs:attribute name="inputVariable" type="xs:NCName"/>
+    <xs:attribute name="outputVariable" type="xs:NCName"/>
+  </xs:complexType>
+
+  <xs:element name="assign" type="bpel:tAssign"/>
+  <xs:complexType name="tAssign">
+    <xs:sequence>
+      <xs:element ref="bpel:copy" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:NCName"/>
+  </xs:complexType>
+
+  <xs:element name="copy" type="bpel:tCopy"/>
+  <xs:complexType name="tCopy">
+    <xs:sequence>
+      <xs:element ref="bpel:from"/>
+      <xs:element ref="bpel:to"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="from" type="bpel:tFrom"/>
+  <xs:complexType name="tFrom" mixed="true">
+    <xs:attribute name="variable" type="xs:NCName"/>
+    <xs:attribute name="part" type="xs:NCName"/>
+  </xs:complexType>
+
+  <xs:element name="to" type="bpel:tTo"/>
+  <xs:complexType name="tTo">
+    <xs:attribute name="variable" type="xs:NCName"/>
+    <xs:attribute name="part" type="xs:NCName"/>
+  </xs:complexType>
+
+  <xs:element name="throw" type="bpel:tThrow"/>
+  <xs:complexType name="tThrow">
+    <xs:attribute name="name" type="xs:NCName"/>
+    <xs:attribute name="faultName" type="xs:QName" use="required"/>
+    <xs:attribute name="faultVariable" type="xs:NCName"/>
+  </xs:complexType>
+
+  <xs:element name="exit" type="bpel:tExit"/>
+  <xs:complexType name="tExit">
+    <xs:attribute name="name" type="xs:NCName"/>
+  </xs:complexType>
+
+  <xs:element name="wait" type="bpel:tWait"/>
+  <xs:complexType name="tWait">
+    <xs:choice>
+      <xs:element name="for" type="xs:string"/>
+      <xs:element name="until" type="xs:string"/>
+    </xs:choice>
+    <xs:attribute name="name" type="xs:NCName"/>
+  </xs:complexType>
+
+  <xs:element name="empty" type="bpel:tEmpty"/>
+  <xs:complexType name="tEmpty">
+    <xs:attribute name="name" type="xs:NCName"/>
+  </xs:complexType>
+
+  <!-- Structured Activities -->
+  <xs:element name="sequence" type="bpel:tSequence"/>
+  <xs:complexType name="tSequence">
+    <xs:sequence>
+      <xs:group ref="bpel:activity" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:NCName"/>
+  </xs:complexType>
+
+  <xs:element name="if" type="bpel:tIf"/>
+  <xs:complexType name="tIf">
+    <xs:sequence>
+      <xs:element name="condition" type="xs:string"/>
+      <xs:group ref="bpel:activity"/>
+      <xs:element ref="bpel:elseif" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="bpel:else" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:NCName"/>
+  </xs:complexType>
+
+  <xs:element name="elseif" type="bpel:tElseif"/>
+  <xs:complexType name="tElseif">
+    <xs:sequence>
+      <xs:element name="condition" type="xs:string"/>
+      <xs:group ref="bpel:activity"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="else" type="bpel:tElse"/>
+  <xs:complexType name="tElse">
+    <xs:sequence>
+      <xs:group ref="bpel:activity"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="while" type="bpel:tWhile"/>
+  <xs:complexType name="tWhile">
+    <xs:sequence>
+      <xs:element name="condition" type="xs:string"/>
+      <xs:group ref="bpel:activity"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:NCName"/>
+  </xs:complexType>
+
+  <xs:element name="repeatUntil" type="bpel:tRepeatUntil"/>
+  <xs:complexType name="tRepeatUntil">
+    <xs:sequence>
+      <xs:group ref="bpel:activity"/>
+      <xs:element name="condition" type="xs:string"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:NCName"/>
+  </xs:complexType>
+
+  <xs:element name="forEach" type="bpel:tForEach"/>
+  <xs:complexType name="tForEach">
+    <xs:sequence>
+      <xs:element name="startCounterValue" type="xs:string"/>
+      <xs:element name="finalCounterValue" type="xs:string"/>
+      <xs:element ref="bpel:scope"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:NCName"/>
+    <xs:attribute name="counterName" type="xs:NCName" use="required"/>
+    <xs:attribute name="parallel" type="xs:boolean" default="false"/>
+  </xs:complexType>
+
+  <xs:element name="pick" type="bpel:tPick"/>
+  <xs:complexType name="tPick">
+    <xs:sequence>
+      <xs:element ref="bpel:onMessage" maxOccurs="unbounded"/>
+      <xs:element ref="bpel:onAlarm" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:NCName"/>
+    <xs:attribute name="createInstance" type="xs:boolean" default="false"/>
+  </xs:complexType>
+
+  <xs:element name="onMessage" type="bpel:tOnMessage"/>
+  <xs:complexType name="tOnMessage">
+    <xs:sequence>
+      <xs:group ref="bpel:activity"/>
+    </xs:sequence>
+    <xs:attribute name="partnerLink" type="xs:NCName" use="required"/>
+    <xs:attribute name="portType" type="xs:QName"/>
+    <xs:attribute name="operation" type="xs:NCName" use="required"/>
+    <xs:attribute name="variable" type="xs:NCName"/>
+  </xs:complexType>
+
+  <xs:element name="onAlarm" type="bpel:tOnAlarm"/>
+  <xs:complexType name="tOnAlarm">
+    <xs:sequence>
+      <xs:choice>
+        <xs:element name="for" type="xs:string"/>
+        <xs:element name="until" type="xs:string"/>
+      </xs:choice>
+      <xs:group ref="bpel:activity"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="flow" type="bpel:tFlow"/>
+  <xs:complexType name="tFlow">
+    <xs:sequence>
+      <xs:element ref="bpel:links" minOccurs="0"/>
+      <xs:group ref="bpel:activity" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:NCName"/>
+  </xs:complexType>
+
+  <xs:element name="links" type="bpel:tLinks"/>
+  <xs:complexType name="tLinks">
+    <xs:sequence>
+      <xs:element ref="bpel:link" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="link" type="bpel:tLink"/>
+  <xs:complexType name="tLink">
+    <xs:attribute name="name" type="xs:NCName" use="required"/>
+  </xs:complexType>
+
+  <xs:element name="scope" type="bpel:tScope"/>
+  <xs:complexType name="tScope">
+    <xs:sequence>
+      <xs:element ref="bpel:variables" minOccurs="0"/>
+      <xs:element ref="bpel:faultHandlers" minOccurs="0"/>
+      <xs:group ref="bpel:activity"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:NCName"/>
+  </xs:complexType>
+
+  <xs:element name="faultHandlers" type="bpel:tFaultHandlers"/>
+  <xs:complexType name="tFaultHandlers">
+    <xs:sequence>
+      <xs:element ref="bpel:catch" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="bpel:catchAll" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="catch" type="bpel:tCatch"/>
+  <xs:complexType name="tCatch">
+    <xs:sequence>
+      <xs:group ref="bpel:activity"/>
+    </xs:sequence>
+    <xs:attribute name="faultName" type="xs:QName"/>
+    <xs:attribute name="faultVariable" type="xs:NCName"/>
+  </xs:complexType>
+
+  <xs:element name="catchAll" type="bpel:tCatchAll"/>
+  <xs:complexType name="tCatchAll">
+    <xs:sequence>
+      <xs:group ref="bpel:activity"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

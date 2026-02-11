@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Example: Simple Order Processing WS-BPEL 2.0 -->
+<process name="OrderProcessingProcess"
+         targetNamespace="http://example.com/bpel/order-processing"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:tns="http://example.com/bpel/order-processing"
+         xmlns:order="http://example.com/services/order">
+
+  <!-- Partner Links define the relationships with external services -->
+  <partnerLinks>
+    <partnerLink name="client" 
+                 partnerLinkType="tns:OrderProcessingPLT" 
+                 myRole="OrderProcessor"/>
+    <partnerLink name="inventoryService" 
+                 partnerLinkType="tns:InventoryPLT" 
+                 partnerRole="InventoryProvider"/>
+    <partnerLink name="paymentService" 
+                 partnerLinkType="tns:PaymentPLT" 
+                 partnerRole="PaymentProcessor"/>
+    <partnerLink name="shippingService" 
+                 partnerLinkType="tns:ShippingPLT" 
+                 partnerRole="ShippingProvider"/>
+  </partnerLinks>
+
+  <!-- Variables to hold message data -->
+  <variables>
+    <variable name="orderRequest" messageType="order:OrderRequestMessage"/>
+    <variable name="orderResponse" messageType="order:OrderResponseMessage"/>
+    <variable name="inventoryRequest" messageType="order:InventoryCheckMessage"/>
+    <variable name="inventoryResponse" messageType="order:InventoryResultMessage"/>
+    <variable name="paymentRequest" messageType="order:PaymentRequestMessage"/>
+    <variable name="paymentResponse" messageType="order:PaymentResultMessage"/>
+    <variable name="shippingRequest" messageType="order:ShippingRequestMessage"/>
+    <variable name="shippingResponse" messageType="order:ShippingResultMessage"/>
+  </variables>
+
+  <!-- Main process sequence -->
+  <sequence name="MainSequence">
+    
+    <!-- Receive order request from client -->
+    <receive name="ReceiveOrder"
+             partnerLink="client"
+             operation="submitOrder"
+             variable="orderRequest"
+             createInstance="true"/>
+
+    <!-- Validate and check inventory -->
+    <assign name="PrepareInventoryCheck">
+      <copy>
+        <from variable="orderRequest" part="orderDetails"/>
+        <to variable="inventoryRequest" part="items"/>
+      </copy>
+    </assign>
+
+    <invoke name="CheckInventory"
+            partnerLink="inventoryService"
+            operation="checkAvailability"
+            inputVariable="inventoryRequest"
+            outputVariable="inventoryResponse"/>
+
+    <!-- Conditional: Process based on inventory availability -->
+    <if name="InventoryDecision">
+      <condition>$inventoryResponse/available = 'true'</condition>
+      
+      <!-- If inventory available: process payment -->
+      <sequence name="ProcessWithInventory">
+        <assign name="PreparePayment">
+          <copy>
+            <from variable="orderRequest" part="paymentInfo"/>
+            <to variable="paymentRequest" part="payment"/>
+          </copy>
+        </assign>
+
+        <invoke name="ProcessPayment"
+                partnerLink="paymentService"
+                operation="charge"
+                inputVariable="paymentRequest"
+                outputVariable="paymentResponse"/>
+
+        <!-- Ship the order -->
+        <assign name="PrepareShipping">
+          <copy>
+            <from variable="orderRequest" part="shippingAddress"/>
+            <to variable="shippingRequest" part="destination"/>
+          </copy>
+        </assign>
+
+        <invoke name="ShipOrder"
+                partnerLink="shippingService"
+                operation="shipItems"
+                inputVariable="shippingRequest"
+                outputVariable="shippingResponse"/>
+
+        <assign name="PrepareSuccessResponse">
+          <copy>
+            <from>'Order processed and shipped successfully'</from>
+            <to variable="orderResponse" part="status"/>
+          </copy>
+          <copy>
+            <from variable="shippingResponse" part="trackingNumber"/>
+            <to variable="orderResponse" part="trackingInfo"/>
+          </copy>
+        </assign>
+      </sequence>
+
+      <!-- Else: notify backorder -->
+      <else>
+        <assign name="PrepareBackorderResponse">
+          <copy>
+            <from>'Item on backorder - will ship when available'</from>
+            <to variable="orderResponse" part="status"/>
+          </copy>
+        </assign>
+      </else>
+    </if>
+
+    <!-- Reply to client -->
+    <reply name="SendResponse"
+           partnerLink="client"
+           operation="submitOrder"
+           variable="orderResponse"/>
+
+  </sequence>
+
+</process>

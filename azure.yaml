@@ -1,0 +1,47 @@
+# Azure Developer CLI (azd) configuration
+# Deploy with: azd up
+
+name: ai-workflow-authoring
+
+metadata:
+  template: ai-workflow-authoring@0.1.0
+
+# Azure resources to provision
+infra:
+  provider: bicep
+  path: infra
+  module: main
+
+# Services to deploy
+services:
+  app:
+    project: .
+    language: python
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      registry: ${AZURE_CONTAINER_REGISTRY_ENDPOINT}
+
+# Hooks for custom deployment steps
+hooks:
+  # After provisioning, assign RBAC role for Azure OpenAI
+  postprovision:
+    shell: pwsh
+    run: |
+      # Get outputs from deployment (using lowercase variable name from bicep outputs)
+      $appPrincipalId = (azd env get-values | ConvertFrom-StringData).containerAppPrincipalId
+      $openAiResourceId = "/subscriptions/$env:AZURE_SUBSCRIPTION_ID/resourceGroups/$env:AZURE_RESOURCE_GROUP/providers/Microsoft.CognitiveServices/accounts/$env:AZURE_OPENAI_ACCOUNT_NAME"
+      
+      if ($appPrincipalId) {
+        # Assign Cognitive Services OpenAI User role
+        Write-Host "Assigning Cognitive Services OpenAI User role to Container App..."
+        az role assignment create `
+          --assignee-object-id $appPrincipalId `
+          --assignee-principal-type ServicePrincipal `
+          --role "Cognitive Services OpenAI User" `
+          --scope $openAiResourceId `
+          --only-show-errors 2>$null
+        Write-Host "RBAC role assigned successfully"
+      } else {
+        Write-Host "No principal ID found, skipping RBAC assignment"
+      }

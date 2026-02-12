@@ -168,7 +168,7 @@ class TestExamplePrompts:
 
     def test_example_prompts_exist(self):
         """Verify example prompts can be read from app."""
-        app_path = Path(__file__).parent.parent / "app.py"
+        app_path = Path(__file__).parent.parent / "pages" / "workflow.py"
 
         with open(app_path, encoding="utf-8") as f:
             content = f.read()
@@ -180,7 +180,7 @@ class TestExamplePrompts:
 
     def test_example_prompts_are_multiline(self):
         """Verify example prompts have multiple steps."""
-        app_path = Path(__file__).parent.parent / "app.py"
+        app_path = Path(__file__).parent.parent / "pages" / "workflow.py"
 
         with open(app_path, encoding="utf-8") as f:
             content = f.read()

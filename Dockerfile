@@ -23,6 +23,8 @@ RUN uv pip install --system -e .
 # Copy application code
 COPY app.py ./
 COPY src/ ./src/
+COPY pages/ ./pages/
+COPY docs/ ./docs/
 COPY schemas/ ./schemas/
 COPY examples/ ./examples/
 

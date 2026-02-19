@@ -47,7 +47,7 @@ flowchart LR
 
 | Component | Purpose |
 |-----------|---------|
-| **Container App** | Hosts the Streamlit web application; scales 0 – 3 replicas based on HTTP traffic |
+| **Container App** | Hosts the Streamlit web application; scales 1 – 3 replicas based on HTTP traffic |
 | **Azure OpenAI** | Provides GPT-4o-mini (or equivalent) for intent parsing, XML generation, and repair |
 | **Container Registry** | Stores the Docker image built during deployment |
 | **Log Analytics** | Collects application and platform logs for monitoring |
@@ -186,7 +186,7 @@ and deployed with a single command via the
 
 Container Apps is configured with **HTTP-based autoscaling**:
 
-- **Minimum replicas:** 0 (scales to zero when there is no traffic)
+- **Minimum replicas:** 1 (always available; set to 0 if scale-to-zero is preferred)
 - **Maximum replicas:** 3
 - **Scale trigger:** 10 concurrent HTTP requests per replica
 
@@ -324,7 +324,7 @@ The architecture is designed with pluggable extension points:
 |---------|-------------------|
 | **Correctness** | Deterministic XSD + semantic validation after every generation and repair attempt |
 | **Security** | Managed identity, RBAC least-privilege, HTTPS-only, no secrets in code |
-| **Cost efficiency** | Scale-to-zero Container Apps, bounded LLM retry loop (max 3), consumption-based pricing |
+| **Cost efficiency** | Always-on with min 1 replica, bounded LLM retry loop (max 3), consumption-based pricing |
 | **Transparency** | Every pipeline stage is visible in the UI; users can inspect and download intermediate artifacts |
 | **Deployment simplicity** | Single `azd up` command deploys the full stack from Bicep IaC |
 | **Standards compliance** | Generates BPMN 2.0 (OMG) and WS-BPEL 2.0 (OASIS) — industry-standard workflow formats |

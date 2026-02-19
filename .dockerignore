@@ -33,11 +33,10 @@ create-pptx.js
 
 # Development files
 tests/
-docs/
 slides/
-*.md
 *.pptx
 .pytest_cache/
+README.md
 
 # Logs (created at runtime)
 logs/*.log

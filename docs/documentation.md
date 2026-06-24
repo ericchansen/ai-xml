@@ -180,7 +180,7 @@ and deployed with a single command via the
 | **Container Apps Environment** | Managed | Provides networking, logging, and scaling infrastructure |
 | **Azure Container Registry** | Basic | Stores the Docker image |
 | **Log Analytics Workspace** | Per-GB (30-day retention) | Aggregates container and platform logs |
-| **Azure OpenAI** *(pre-existing)* | Standard | Hosts the GPT-4o-mini deployment used by the pipeline |
+| **Azure AI Foundry (Azure OpenAI)** | Standard (S0) | Provisioned by Bicep; hosts the GPT-4o-mini deployment used by the pipeline |
 
 ### Scaling
 
@@ -226,10 +226,12 @@ environment variables, or configuration files.
 
 ### RBAC role assignment
 
-During deployment, a post-provisioning hook automatically assigns the
+During deployment, the Bicep template assigns the
 **Cognitive Services OpenAI User** role to the Container App's managed
-identity. This grants the application exactly the permissions it needs — and
-nothing more — to call the Azure OpenAI endpoint.
+identity, scoped to the Foundry account. This grants the application exactly
+the permissions it needs — and nothing more — to call the Azure OpenAI
+endpoint. Because the role assignment lives in the IaC (not a deployment
+hook), it is captured as code and reconciled on every deploy.
 
 ```mermaid
 flowchart LR
